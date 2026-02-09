@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Data Annunciator Relay</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    padding: 15px;
+}
+h1 {
+    text-align: center;
+}
+.kotak {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+}
+input, textarea, button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+}
+button {
+    border: none;
+    cursor: pointer;
+}
+.simpan {
+    background: #0d6efd;
+    color: white;
+}
+.hapus {
+    background: #dc3545;
+    color: white;
+    margin-top: 5px;
+}
+.edit {
+    background: #ffc107;
+    color: black;
+    margin-top: 5px;
+}
+.item-data {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Aplikasi Data Annunciator Relay</h1>
+
+<div class="kotak">
+<h3>Input / Edit Alarm</h3>
+
+<input type="hidden" id="indexEdit">
+
+<input type="text" id="relay" placeholder="Nama Relay (OCR, GFR, Distance)">
+<input type="text" id="alarm" placeholder="Jenis Alarm (Trip, Warning)">
+<input type="text" id="lokasi" placeholder="Lokasi / Bay">
+<textarea id="keterangan" placeholder="Keterangan kejadian"></textarea>
+<input type="text" id="keyword" placeholder="Keyword">
+
+<button class="simpan" onclick="simpanData()">Simpan Data</button>
+</div>
+
+<div class="kotak">
+<h3>Cari Alarm</h3>
+<input type="text" id="cari" placeholder="Cari data..." onkeyup="cariData()">
+</div>
+
+<div class="kotak">
+<h3>Daftar Alarm</h3>
+<div id="hasil"></div>
+</div>
+
+<script>
+let database = JSON.parse(localStorage.getItem("annunciator")) || [];
+
+function simpanData() {
+    let indexEdit = document.getElementById("indexEdit").value;
+
+    let data = {
+        relay: relay.value,
+        alarm: alarm.value,
+        lokasi: lokasi.value,
+        keterangan: keterangan.value,
+        keyword: keyword.value
+    };
+
+    if (data.relay === "" || data.alarm === "") {
+        alert("Relay dan Alarm wajib diisi!");
+        return;
+    }
+
+    if (indexEdit === "") {
+        database.push(data);
+    } else {
+        database[indexEdit] = data;
+        document.getElementById("indexEdit").value = "";
+    }
+
+    localStorage.setItem("annunciator", JSON.stringify(database));
+    resetForm();
+    tampilkanData(database);
+}
+
+function tampilkanData(data) {
+    let hasil = document.getElementById("hasil");
+    hasil.innerHTML = "";
+
+    data.forEach((item, index) => {
+        hasil.innerHTML += `
+        <div class="item-data">
+            <b>Relay:</b> ${item.relay}<br>
+            <b>Alarm:</b> ${item.alarm}<br>
+            <b>Lokasi:</b> ${item.lokasi}<br>
+            <b>Keterangan:</b> ${item.keterangan}<br>
+            <i>Keyword: ${item.keyword}</i><br>
+
+            <button class="edit" onclick="editData(${index})">Edit</button>
+            <button class="hapus" onclick="hapusData(${index})">Hapus</button>
+        </div>
+        `;
+    });
+}
+
+function editData(index) {
+    let item = database[index];
+    relay.value = item.relay;
+    alarm.value = item.alarm;
+    lokasi.value = item.lokasi;
+    keterangan.value = item.keterangan;
+    keyword.value = item.keyword;
+    indexEdit.value = index;
+}
+
+function hapusData(index) {
+    if (confirm("Yakin hapus data ini?")) {
+        database.splice(index, 1);
+        localStorage.setItem("annunciator", JSON.stringify(database));
+        tampilkanData(database);
+    }
+}
+
+function cariData() {
+    let kata = cari.value.toLowerCase();
+    let hasilCari = database.filter(item =>
+        item.relay.toLowerCase().includes(kata) ||
+        item.alarm.toLowerCase().includes(kata) ||
+        item.keyword.toLowerCase().includes(kata)
+    );
+    tampilkanData(hasilCari);
+}
+
+function resetForm() {
+    document.querySelectorAll("input, textarea").forEach(e => e.value = "");
+}
+
+tampilkanData(database);
+</script>
+
+</body>
+</html>
