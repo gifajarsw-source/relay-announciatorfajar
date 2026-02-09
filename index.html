@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Data Annunciator Relay</title>
-
+    
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -161,6 +163,12 @@ function resetForm() {
 }
 
 tampilkanData(database);
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
 
 </body>
